@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Bank Customer Support Prompt Chain</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-50 min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-3xl bg-white rounded-lg shadow-lg p-6">
+      <h1 class="text-2xl font-semibold mb-3 flex items-center justify-center">Bank Customer Support Prompt Chain</h1>
+
+      <label class="block text-sm font-medium text-gray-700 flex items-center justify-center mb-5">Kindly type in a customer query below in the box and click Run Prompt.</label>
+      <textarea id="queryInput" rows="4" class="mt-1 block w-full rounded-lg border-2 border-indigo-400 shadow-sm focus:ring-indigo-500 focus:border-indigo-600 transition-all duration-150 p-3 text-base" placeholder="Enter a customer message..."></textarea>
+
+      <div class="mt-4 flex gap-2 items-center justify-center">
+        <button id="runBtn" class="px-5 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg shadow hover:from-indigo-700 hover:to-purple-700 font-semibold transition-all duration-150">Run Prompt</button>
+        <button id="runExampleBtn" class="px-5 py-2 bg-gray-100 text-indigo-700 rounded-lg border border-indigo-300 hover:bg-indigo-50 font-medium transition-all duration-150">Run Sample Prompt</button>
+      </div>
+
+      <div id="results" class="mt-8 space-y-6"></div>
+    </div>
+
+    <script src="prompt-chain.js"></script>
+
+    <script>
+      const runBtn = document.getElementById('runBtn');
+      const runExampleBtn = document.getElementById('runExampleBtn');
+      const queryInput = document.getElementById('queryInput');
+      const results = document.getElementById('results');
+
+      function renderOutput(outputs) {
+        results.innerHTML = '';
+        outputs.forEach((entry, idx) => {
+          const card = document.createElement('div');
+          card.className = 'p-5 border-2 border-indigo-100 rounded-xl bg-gradient-to-br from-white to-indigo-50 shadow-sm';
+          const title = document.createElement('div');
+          title.className = 'font-semibold mb-2 text-indigo-700 text-lg';
+          title.textContent = `${idx+1}. ${entry.step}`;
+          const pre = document.createElement('pre');
+          pre.className = 'whitespace-pre-wrap text-sm text-gray-800';
+          pre.textContent = typeof entry.output === 'string' ? entry.output : JSON.stringify(entry.output, null, 2);
+          card.appendChild(title);
+          card.appendChild(pre);
+          results.appendChild(card);
+        });
+      }
+
+      runBtn.addEventListener('click', () => {
+        const q = queryInput.value.trim();
+        if (!q) {
+          results.innerHTML = '<div class="text-red-500 font-medium">Please enter a customer query.</div>';
+          return;
+        }
+        const outputs = runPromptChain(q);
+        renderOutput(outputs);
+      });
+
+      runExampleBtn.addEventListener('click', () => {
+        const sample = "My credit card was debited with $70 on 11/09/2025 and I did not authorize it. Please help!";
+        queryInput.value = sample;
+        const outputs = runPromptChain(sample);
+        renderOutput(outputs);
+      });
+
+    </script>
+  </body>
+</html>
